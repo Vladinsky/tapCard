@@ -1,33 +1,18 @@
+import { useSyncExternalStore } from 'react'
 import './App.css'
-import { mockVenue } from './data/mockVenue'
+import { BusinessPage } from './pages/BusinessPage'
+
+function subscribe(callback: () => void) {
+  window.addEventListener('popstate', callback)
+  return () => window.removeEventListener('popstate', callback)
+}
 
 function App() {
-  return (
-    <main className="venue-page">
-      <section className="venue-card">
-        <div className="venue-logo" aria-hidden="true">
-          BC
-        </div>
-
-        <h1 className="venue-title">{mockVenue.name}</h1>
-        <p className="venue-description">{mockVenue.description}</p>
-
-        <nav className="venue-actions" aria-label="Collegamenti del locale">
-          {mockVenue.links.map((link) => (
-            <a
-              className="venue-link"
-              href={link.url}
-              key={link.id}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-      </section>
-    </main>
-  )
+  const pathname = useSyncExternalStore(subscribe, () => window.location.pathname)
+  const match = /^\/b\/([^/]+)\/?$/.exec(pathname)
+  let slug = pathname === '/' ? 'bar-centrale' : ''
+  try { if (match) slug = decodeURIComponent(match[1]) } catch { /* Invalid paths resolve to not found. */ }
+  return <BusinessPage key={slug} slug={slug} />
 }
 
 export default App
