@@ -24,15 +24,19 @@ export default async (request: Request) => {
     try { if (!await record(client, input, 'click', action)) console.warn('analytics_click_rate_limited') }
     catch (error) { console.error('analytics_click_failed', error instanceof Error ? error.message : 'database error') }
     return new Response(null, { status: 302, headers: { Location: target, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' } })
-  } catch (error) {console.error('redirect_resolution_failed', {
-                     code:
-                       typeof error === 'object' && error !== null && 'code' in error
-                         ? String(error.code)
-                         : 'unknown',
-                     message:
-                       typeof error === 'object' && error !== null && 'message' in error
-                         ? String(error.message)
-                         : 'Unknown error',
-                   }) }
-}
+    } catch (error) {
+      console.error('redirect_resolution_failed', {
+        code:
+          typeof error === 'object' && error !== null && 'code' in error
+            ? String(error.code)
+            : 'unknown',
+        message:
+          typeof error === 'object' && error !== null && 'message' in error
+            ? String(error.message)
+            : 'Unknown error',
+      })
+
+      return response(503, 'Link temporarily unavailable')
+    }
+  }
 
